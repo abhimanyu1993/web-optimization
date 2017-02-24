@@ -498,6 +498,25 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
+var latestKnownScrollY = 0;
+// Set ticking to true
+var ticking = true;
+
+// Scroll callback utilizing latestKnownScrollY and window event listener
+function onScroll() {
+  latestKnownScrollY = window.scrollY;
+  requestTick();
+}
+
+// use requestAnimationFrame only when scrolling
+// used great tips from http://www.html5rocks.com/en/tutorials/speed/animations/
+function requestTick() {
+  if (!ticking) {
+    requestAnimationFrame(updatePositions);
+  }
+  ticking = true;
+}
+
 function updatePositions() {
   ticking = false;
   frame++;
