@@ -494,8 +494,6 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
   console.log("Average scripting time to generate last 10 frames: " + sum / 10 + "ms");
 }
 
-// The following code for sliding background pizzas was pulled from Ilya's demo found at:
-// https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
 var latestKnownScrollY = 0;
@@ -509,7 +507,6 @@ function onScroll() {
 }
 
 // use requestAnimationFrame only when scrolling
-// used great tips from http://www.html5rocks.com/en/tutorials/speed/animations/
 function requestTick() {
   if (!ticking) {
     requestAnimationFrame(updatePositions);
