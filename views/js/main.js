@@ -495,46 +495,47 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 }
 
 
-// Moves the sliding background pizzas based on scroll position
-var latestKnownScrollY = 0;
-// Set ticking to true
-var ticking = true;
+var updatePositionsTick = false;
 
-// Scroll callback utilizing latestKnownScrollY and window event listener
-function onScroll() {
-  latestKnownScrollY = window.scrollY;
-  requestTick();
+// Executed on scroll from listner
+function scrolled() {
+  //requestAnimationFrame(updatePositions);
+  requestTick() //removed after testing
 }
 
-// use requestAnimationFrame only when scrolling
+// Check tick
 function requestTick() {
-  if (!ticking) {
+
+  // If tick is false. Then updatePosition is ready to go again.
+  // Not sure if it's actually working or making a difference. I did some tests and found that
+  // scrolled and updatePositions were called an equal amount of times.
+  // Left in because it doesn't seem to hurt and may have an effect for slower devices?
+  if (!updatePositionsTick) {
     requestAnimationFrame(updatePositions);
+    updatePositionsTick = true;
   }
-  ticking = true;
+  
 }
 
+// Updates position of pizzas
+// Choose to use style.left from the recorded start position of basicLeft as it ran same speed
+// as translateX in Chrome but much faster in IE and a little faster in firefox
 function updatePositions() {
-  ticking = false;
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.getElementsByClassName('mover');
+  var items = document.getElementsByClassName('mover'); // Cache items
+  var len = items.length; // Cache length
+  var phaseInt = document.body.scrollTop / 1250; // Move calulation out of loop
 
-  var currentScrollY = latestKnownScrollY / 1250;
-  var phase;
-  // use transform and translate GPU accelerated css
-  //use style.transform to use GPU and avoid re-layout time.
-
-
-  for (var i = 0; i < items.length; i++) {
-
-    phase = Math.sin(currentScrollY + (i % 5));
-
-    items[i].style.transform = "translateX("+ 100 * phase + "px)";
+  for (var i = 0; i < len; i++) {
+    var move = Math.sin(phaseInt + (i % 5)) * 100; // Calcuations that are on on invidivual basis
+    //items[i].style.left = move + items[i].basicLeft + 'px'; // move the item
+    items[i].style.transform = "translateX(" + move + "px)";
   }
-  // User Timing API to the rescue again. Seriously, it's worth learning.
-  // Super easy to create custom metrics.
+
+  updatePositionsTick = false;
+
   window.performance.mark("mark_end_frame");
   window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
   if (frame % 10 === 0) {
@@ -552,11 +553,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var s = 256;
   for (var i = 0; i < 200; i++) {
     var elem = document.createElement('img');
+    var left=(i%cols)*s;
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
-    elem.basicLeft = (i % cols) * s;
+    elem.style.left = left + 'px';
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
